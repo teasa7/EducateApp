@@ -11,12 +11,15 @@ namespace EducateApp.Controllers
     {
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
 
-        public AccountController(UserManager<User> userManager, SignInManager<User> signInManager)
+        public AccountController(UserManager<User> userManager, SignInManager<User> signInManager, RoleManager<IdentityRole> roleManager)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _roleManager = roleManager;
         }
+
         [HttpGet]
         public IActionResult Register()
         {
@@ -34,12 +37,13 @@ namespace EducateApp.Controllers
                     Email = model.Email, 
                     UserName = model.Email
                 };
-                // добавляем пользователя
+
                 var result = await _userManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
                 {
-                    // установка куки
+
                     await _signInManager.SignInAsync(user, false);
+                    await _userManager.AddToRoleAsync(user, "registeredUser");
                     return RedirectToAction("Index", "Home");
                 }
                 else
@@ -69,7 +73,6 @@ namespace EducateApp.Controllers
                     await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, false);
                 if (result.Succeeded)
                 {
-                    // проверяем, принадлежит ли URL приложению
                     if (!string.IsNullOrEmpty(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl))
                     {
                         return Redirect(model.ReturnUrl);
@@ -91,7 +94,6 @@ namespace EducateApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {
-            // удаляем аутентификационные куки
             await _signInManager.SignOutAsync();
             return RedirectToAction("Login", "Account");
         }
