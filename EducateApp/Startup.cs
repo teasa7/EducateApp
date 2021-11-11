@@ -31,7 +31,9 @@ namespace EducateApp
             services.AddTransient<IUserValidator<User>, CustomUserValidator>();
 
             services.AddIdentity<User, IdentityRole>()
-                .AddEntityFrameworkStores<AppCtx>();
+                .AddEntityFrameworkStores<AppCtx>()
+                .AddDefaultTokenProviders();
+
 
             services.AddControllersWithViews();
         }
