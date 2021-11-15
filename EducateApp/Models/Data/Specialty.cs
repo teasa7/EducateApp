@@ -22,7 +22,6 @@ namespace EducateApp.Models.Data
         public short IdFormOfStudy { get; set; }
 
 
-        // Навигационные свойства
         [Display(Name = "Форма обучения")]
         [ForeignKey("IdFormOfStudy")]
         public FormOfStudy FormOfStudy { get; set; }
