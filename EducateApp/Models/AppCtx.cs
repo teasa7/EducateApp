@@ -12,5 +12,6 @@ namespace EducateApp.Models
             Database.EnsureCreated();
         }
         public DbSet<FormOfStudy> FormsOfStudy { get; set; }
+        public DbSet<Specialty> Specialties { get; set; }
     }
 }

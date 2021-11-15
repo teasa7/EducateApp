@@ -28,12 +28,11 @@
                         {
                             <ul class="navbar-nav flex-grow">
                                 <li>
-                                    <a class="nav-link text-dark" asp-controller="Account" asp-action="Login" title="Главная">
+                                    <a class="nav-link text-dark" asp-controller="Home" asp-action="Index" title="Главная">
                                         <i class="fas fa-home"></i>
                                     </a>
                                 </li>
 
-                                @*если пользователь с ролью админ, то он получает доступ к работе со всеми пользователями системы*@
                                 @if (User.Claims.Where(c => c.Type == System.Security.Claims.ClaimTypes.Role).Select(s => s.Value).Contains("admin"))
                                 {
                                     <li class="nav-item">
@@ -48,6 +47,7 @@
                                     </a>
                                     <div class="dropdown-menu">
                                         <a class="dropdown-item text-dark" asp-controller="FormsOfStudy" asp-action="Index">Формы обучения</a>
+                                        <a class="dropdown-item text-dark" asp-controller="Specialties" asp-action="Index">Специальности</a>
                                     </div>
                                 </li>
                             </ul>
