@@ -4,10 +4,22 @@
     ViewData["Title"] = "Изменение - Дисциплины";
 }
 
-<h1>Изменение</h1>
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Главная</a></li>
+        <li class="breadcrumb-item"><a asp-controller="Disciplines" asp-action="Index">Дисциплины</a></li>
+        <li class="breadcrumb-item active">Изменение</li>
+    </ol>
+</nav>
 
-<h4>Дисциплины</h4>
+<h3>
+    <a class="btn text-dark" asp-action="Index" title="Вернуться к списку">
+        <i class="fas fa-arrow-left"></i>
+    </a>
+    Изменение дисциплины
+</h3>
 <hr />
+
 <div class="row">
     <div class="col-md-4">
         <form asp-action="Edit">
@@ -50,9 +62,6 @@
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Назад</a>
-</div>
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}

@@ -4,11 +4,14 @@
     ViewData["Title"] = "Виды промежуточной аттестации";
 }
 
-<h1>Детали</h1>
+<h3>
+    <a class="btn text-dark" asp-action="Index" title="Вернуться к списку">
+        <i class="fas fa-arrow-left"></i>
+    </a>
+    Просмотр вида промежуточной аттестации
+</h3>
 
 <div>
-    <h4>Виды промежуточной аттестации</h4>
-    <hr />
     <dl class="row">
         <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.CertificateName)
@@ -17,14 +20,10 @@
             @Html.DisplayFor(model => model.CertificateName)
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.User)
+            @Html.DisplayNameFor(model => model.User.LastName)
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.User.Id)
+            @Html.DisplayFor(model => model.User.LastName)
         </dd>
     </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model.Id">Изменить</a> |
-    <a asp-action="Index">Назад</a>
 </div>
