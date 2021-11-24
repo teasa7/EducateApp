@@ -30,16 +30,13 @@ namespace EducateApp.Controllers
         // GET: FormsOfStudy
         public async Task<IActionResult> Index()
         {
-            // находим информацию о пользователе, который вошел в систему по его имени
             IdentityUser user = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
 
-            // через контекст данных получаем доступ к таблице базы данных FormsOfStudy
             var appCtx = _context.FormsOfStudy
-                .Include(f => f.User)                // и связываем с таблицей пользователи через класс User
-                .Where(f => f.IdUser == user.Id)     // устанавливается условие с выбором записей форм обучения текущего пользователя по его Id
-                .OrderBy(f => f.FormOfEdu);          // сортируем все записи по имени форм обучения
+                .Include(f => f.User)               
+                .Where(f => f.IdUser == user.Id)    
+                .OrderBy(f => f.FormOfEdu);         
 
-            // возвращаем в представление полученный список записей
             return View(await appCtx.ToListAsync());
         }
 
