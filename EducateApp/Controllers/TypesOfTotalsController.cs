@@ -9,6 +9,7 @@ using EducateApp.Models;
 using EducateApp.Models.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using EducateApp.ViewModels.TypesOfTotals;
 
 namespace EducateApp.Controllers
 {
@@ -61,23 +62,36 @@ namespace EducateApp.Controllers
         // GET: TypesOfTotals/Create
         public IActionResult Create()
         {
-            ViewData["IdUser"] = new SelectList(_context.Users, "Id", "LastName");
             return View();
         }
 
         // POST: TypesOfTotals/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,CertificateName,IdUser")] TypeOfTotal typeOfTotal)
+        public async Task<IActionResult> Create(CreateTypeOfTotalViewModel model)
         {
+            IdentityUser user = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
+
+            if (_context.TypesOfTotals
+                .Where(f => f.IdUser == user.Id &&
+                    f.CertificateName == model.CertificateName).FirstOrDefault() != null)
+            {
+                ModelState.AddModelError("", "Введенный вид промежуточной аттестации уже существует");
+            }
+
             if (ModelState.IsValid)
             {
+                TypeOfTotal typeOfTotal = new()
+                {
+                    CertificateName = model.CertificateName,
+                    IdUser = user.Id
+                };
+
                 _context.Add(typeOfTotal);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["IdUser"] = new SelectList(_context.Users, "Id", "LastName", typeOfTotal.IdUser);
-            return View(typeOfTotal);
+            return View(model);
         }
 
         // GET: TypesOfTotals/Edit/5
@@ -93,24 +107,43 @@ namespace EducateApp.Controllers
             {
                 return NotFound();
             }
-            ViewData["IdUser"] = new SelectList(_context.Users, "Id", "LastName", typeOfTotal.IdUser);
-            return View(typeOfTotal);
+
+            EditTypeOfTotalViewModel model = new()
+            {
+                Id = typeOfTotal.Id,
+                CertificateName = typeOfTotal.CertificateName,
+                IdUser = typeOfTotal.IdUser
+            };
+
+            return View(model);
         }
 
         // POST: TypesOfTotals/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(short id, [Bind("Id,CertificateName,IdUser")] TypeOfTotal typeOfTotal)
+        public async Task<IActionResult> Edit(short id, EditTypeOfTotalViewModel model)
         {
+            TypeOfTotal typeOfTotal = await _context.TypesOfTotals.FindAsync(id);
+
             if (id != typeOfTotal.Id)
             {
                 return NotFound();
+            }
+
+            IdentityUser user = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
+
+            if (_context.TypesOfTotals
+               .Where(f => f.IdUser == user.Id &&
+                   f.CertificateName == model.CertificateName).FirstOrDefault() != null)
+            {
+                ModelState.AddModelError("", "Введенный вид промежуточной аттестации уже существует");
             }
 
             if (ModelState.IsValid)
             {
                 try
                 {
+                    typeOfTotal.CertificateName = model.CertificateName;
                     _context.Update(typeOfTotal);
                     await _context.SaveChangesAsync();
                 }
@@ -127,8 +160,7 @@ namespace EducateApp.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["IdUser"] = new SelectList(_context.Users, "Id", "LastName", typeOfTotal.IdUser);
-            return View(typeOfTotal);
+            return View(model);
         }
 
         // GET: TypesOfTotals/Delete/5

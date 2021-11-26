@@ -1,5 +1,6 @@
 ﻿using EducateApp.Models;
 using EducateApp.Models.Data;
+using EducateApp.ViewModels.Disciplines;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -58,23 +59,40 @@ namespace EducateApp.Controllers
         // GET: Disciplines/Create
         public IActionResult Create()
         {
-            ViewData["IdUser"] = new SelectList(_context.Users, "Id", "LastName");
             return View();
         }
 
         // POST: Disciplines/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,IndexProfModule,ProfModule,Index,Name,ShortName,IdUser")] Disciplines disciplines)
+        public async Task<IActionResult> Create(CreateDisciplineViewModel model)
         {
+            IdentityUser user = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
+
+            if (_context.Disciplines
+                .Where(f => f.IdUser == user.Id &&
+                    f.Name == model.Name).FirstOrDefault() != null)
+            {
+                ModelState.AddModelError("", "Введенный вид дисциплины уже существует");
+            }
+
             if (ModelState.IsValid)
             {
+                Disciplines disciplines = new()
+                {
+                    IndexProfModule = model.IndexProfModule,
+                    ProfModule = model.ProfModule,
+                    Index = model.Index,
+                    Name = model.Name,
+                    ShortName = model.ShortName,
+                    IdUser = user.Id
+                };
+
                 _context.Add(disciplines);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["IdUser"] = new SelectList(_context.Users, "Id", "LastName", disciplines.IdUser);
-            return View(disciplines);
+            return View(model);
         }
 
         // GET: Disciplines/Edit/5
@@ -90,24 +108,53 @@ namespace EducateApp.Controllers
             {
                 return NotFound();
             }
-            ViewData["IdUser"] = new SelectList(_context.Users, "Id", "LastName", disciplines.IdUser);
-            return View(disciplines);
+
+            EditDisciplineViewModel model = new()
+            {
+                Id = disciplines.Id,
+                IndexProfModule = disciplines.IndexProfModule,
+                ProfModule = disciplines.ProfModule,
+                Index = disciplines.Index,
+                Name = disciplines.Name,
+                ShortName = disciplines.ShortName,
+                IdUser = disciplines.IdUser
+            };
+
+            return View(model);
         }
 
         // POST: Disciplines/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(short id, [Bind("Id,IndexProfModule,ProfModule,Index,Name,ShortName,IdUser")] Disciplines disciplines)
+        public async Task<IActionResult> Edit(short id, EditDisciplineViewModel model)
         {
+            Disciplines disciplines = await _context.Disciplines.FindAsync(id);
+
             if (id != disciplines.Id)
             {
                 return NotFound();
+            }
+
+
+
+            IdentityUser user = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
+
+            if (_context.Disciplines
+                .Where(f => f.IdUser == user.Id &&
+                    f.Name == model.Name).FirstOrDefault() != null)
+            {
+                ModelState.AddModelError("", "Введенный вид дисциплины уже существует");
             }
 
             if (ModelState.IsValid)
             {
                 try
                 {
+                    disciplines.IndexProfModule = model.IndexProfModule;
+                    disciplines.ProfModule = model.ProfModule;
+                    disciplines.Index = model.Index;
+                    disciplines.Name = model.Name;
+                    disciplines.ShortName = model.ShortName;
                     _context.Update(disciplines);
                     await _context.SaveChangesAsync();
                 }
@@ -124,8 +171,7 @@ namespace EducateApp.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["IdUser"] = new SelectList(_context.Users, "Id", "LastName", disciplines.IdUser);
-            return View(disciplines);
+            return View(model);
         }
 
         // GET: Disciplines/Delete/5

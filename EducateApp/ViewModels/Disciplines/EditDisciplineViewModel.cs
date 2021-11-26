@@ -1,12 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
-namespace EducateApp.Models.Data
+namespace EducateApp.ViewModels.Disciplines
 {
-    public class Disciplines
+    public class EditDisciplineViewModel
     {
-        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        [Display(Name = "ИД")]
         public short Id { get; set; }
 
         [Required(ErrorMessage = "Введите индекс профессионального модуля")]
@@ -26,12 +23,6 @@ namespace EducateApp.Models.Data
         [Display(Name = "Краткое название")]
         public string ShortName { get; set; }
 
-        [Display(Name = "Преподаватель")]
-        [Required]
         public string IdUser { get; set; }
-
-
-        [ForeignKey("IdUser")]
-        public User User { get; set; }
     }
 }

@@ -1,5 +1,4 @@
-﻿@model EducateApp.Models.Data.Disciplines
-
+﻿@model EducateApp.ViewModels.Disciplines.EditDisciplineViewModel
 @{
     ViewData["Title"] = "Изменение - Дисциплины";
 }
@@ -49,11 +48,6 @@
                 <label asp-for="ShortName" class="control-label"></label>
                 <input asp-for="ShortName" class="form-control" />
                 <span asp-validation-for="ShortName" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="IdUser" class="control-label"></label>
-                <select asp-for="IdUser" class="form-control" asp-items="ViewBag.IdUser"></select>
-                <span asp-validation-for="IdUser" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <input type="submit" value="Сохранить" class="btn btn-primary" />
