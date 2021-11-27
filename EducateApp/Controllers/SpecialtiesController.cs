@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -24,15 +25,62 @@ namespace EducateApp.Controllers
         }
 
         // GET: Specialties
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string code, string name, short? formOfEdu, int page = 1, SpecialtySortState sortOrder = SpecialtySortState.CodeAsc)
         {
             IdentityUser user = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
 
-            var appCtx = _context.Specialties
-                .Include(s => s.FormOfStudy)                 
-                .Where(w => w.FormOfStudy.IdUser == user.Id)  
-                .OrderBy(f => f.Code);                     
-            return View(await appCtx.ToListAsync());           
+            int pageSize = 15;
+
+            IQueryable<Specialty> specialties = _context.Specialties
+                .Where(w => w.FormOfStudy.IdUser == user.Id);
+
+            if (!String.IsNullOrEmpty(code))
+            {
+                specialties = specialties.Where(p => p.Code.Contains(code));
+            }
+            if (!String.IsNullOrEmpty(name))
+            {
+                specialties = specialties.Where(p => p.Name.Contains(name));
+            }
+            if (formOfEdu != null && formOfEdu != 0)
+            {
+                specialties = specialties.Where(p => p.IdFormOfStudy == formOfEdu);
+            }
+
+            switch (sortOrder)
+            {
+                case SpecialtySortState.CodeDesc:
+                    specialties = specialties.OrderByDescending(s => s.Code);
+                    break;
+                case SpecialtySortState.NameAsc:
+                    specialties = specialties.OrderBy(s => s.Name);
+                    break;
+                case SpecialtySortState.NameDesc:
+                    specialties = specialties.OrderByDescending(s => s.Name);
+                    break;
+                case SpecialtySortState.FormOfStudyAsc:
+                    specialties = specialties.OrderBy(s => s.FormOfStudy.FormOfEdu);
+                    break;
+                case SpecialtySortState.FormOfStudyDesc:
+                    specialties = specialties.OrderByDescending(s => s.FormOfStudy.FormOfEdu);
+                    break;
+                default:
+                    specialties = specialties.OrderBy(s => s.Code);
+                    break;
+            }
+
+            var count = await specialties.CountAsync();
+            var items = await specialties.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+
+            IndexSpecialtyViewModel viewModel = new()
+            {
+                PageViewModel = new(count, page, pageSize),
+                SortSpecialtyViewModel = new(sortOrder),
+                FilterSpecialtyViewModel = new(code, name, _context.FormsOfStudy.ToList(), formOfEdu),
+                Specialties = items
+            };
+
+            return View(viewModel);
         }
 
         // GET: Specialties/Create
