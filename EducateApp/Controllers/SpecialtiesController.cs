@@ -124,6 +124,18 @@ namespace EducateApp.Controllers
                 return NotFound();
             }
 
+            IdentityUser user = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
+
+            if (_context.Specialties
+                .Where(f => f.FormOfStudy.IdUser == user.Id &&
+                    f.Code == model.Code &&
+                    f.Name == model.Name &&
+                    f.IdFormOfStudy == model.IdFormOfStudy)
+                .FirstOrDefault() != null)
+            {
+                ModelState.AddModelError("", "Введеная специальность уже существует");
+            }
+
             if (ModelState.IsValid)
             {
                 try
@@ -147,7 +159,6 @@ namespace EducateApp.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            IdentityUser user = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
 
             ViewData["IdFormOfStudy"] = new SelectList(
                 _context.FormsOfStudy.Where(w => w.IdUser == user.Id),

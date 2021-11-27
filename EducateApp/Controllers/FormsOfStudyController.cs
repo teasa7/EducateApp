@@ -87,7 +87,6 @@ namespace EducateApp.Controllers
             {
                 return NotFound();
             }
-
             EditFormOfStudyViewModel model = new()
             {
                 Id = formOfStudy.Id,
@@ -98,6 +97,7 @@ namespace EducateApp.Controllers
             return View(model);
         }
 
+        // POST: Specialties/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(short id, EditFormOfStudyViewModel model)
@@ -109,11 +109,22 @@ namespace EducateApp.Controllers
                 return NotFound();
             }
 
+            IdentityUser user = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
+
+            if (_context.FormsOfStudy
+                .Where(f => f.IdUser == user.Id &&
+                    f.FormOfEdu == model.FormOfEdu).FirstOrDefault() != null)
+            {
+                ModelState.AddModelError("", "Введенный вид дисциплины уже существует");
+            }
+
             if (ModelState.IsValid)
             {
                 try
                 {
+                    formOfStudy.Id = model.Id;
                     formOfStudy.FormOfEdu = model.FormOfEdu;
+                    formOfStudy.IdUser = model.IdUser;
                     _context.Update(formOfStudy);
                     await _context.SaveChangesAsync();
                 }
@@ -132,6 +143,7 @@ namespace EducateApp.Controllers
             }
             return View(model);
         }
+        
 
         // GET: FormsOfStudy/Delete/5
         public async Task<IActionResult> Delete(short? id)
