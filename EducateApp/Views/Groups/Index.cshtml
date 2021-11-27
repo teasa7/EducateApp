@@ -4,12 +4,22 @@
     ViewData["Title"] = "Группы";
 }
 
-<nav aria-label="breadcrumb">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Главная</a></li>
-        <li class="breadcrumb-item active">Группы</li>
-    </ol>
-</nav>
+<div class="d-flex justify-content-between">
+    <div class="p-2">
+        <ul class="nav">
+            <li>
+                <a class="btn text-dark" asp-action="DownloadPattern" title="Скачать шаблон">
+                    <i class="fas fa-file-download"></i>
+                </a>
+            </li>
+            <li>
+                <a class="btn text-dark" asp-action="Create">
+                    <i class="far fa-plus-square"></i>  Добавить группу
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>
 <h2>Группы</h2>
 
 <h6>

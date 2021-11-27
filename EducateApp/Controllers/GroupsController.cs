@@ -1,4 +1,5 @@
-﻿using EducateApp.Models;
+﻿using ClosedXML.Excel;
+using EducateApp.Models;
 using EducateApp.Models.Data;
 using EducateApp.ViewModels.Groups;
 using Microsoft.AspNetCore.Authorization;
@@ -6,6 +7,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -305,6 +308,70 @@ namespace EducateApp.Controllers
             }
 
             return View(group);
+        }
+
+        public async Task<FileResult> DownloadPattern()
+        {
+            IdentityUser user = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
+
+            var appCtx = _context.Specialties
+                .Include(s => s.FormOfStudy)
+                .Include(f => f.Groups)
+                .Where(w => w.FormOfStudy.IdUser == user.Id)
+                .OrderBy(f => f.FormOfStudy.FormOfEdu)
+                .ThenBy(f => f.Code);
+
+            int i = 1;
+            IXLRange rngBorder;
+
+            using (XLWorkbook workbook = new(XLEventTracking.Disabled))
+            {
+                foreach (Specialty specialty in appCtx)
+                {
+                    IXLWorksheet worksheet = workbook.Worksheets
+                        .Add($"{specialty.FormOfStudy.FormOfEdu.Substring(0, 3)} {specialty.Code}");
+
+
+                    worksheet.Cell("A" + i).Value = "Форма обучения";
+                    worksheet.Cell("B" + i).Value = specialty.FormOfStudy.FormOfEdu;
+                    i++;
+
+                    worksheet.Cell("A" + i).Value = "Код специальности";
+                    worksheet.Cell("B" + i).Value = $"'{specialty.Code}";
+
+                    worksheet.Cell("C" + i).Value = "Название";
+                    worksheet.Cell("D" + i).Value = specialty.Name;
+
+
+                    i += 2;
+                    worksheet.Cell("A" + i).Value = "Название группы";
+                    worksheet.Cell("B" + i).Value = "Кол. студентов";
+                    worksheet.Cell("C" + i).Value = "Год поступления";
+                    worksheet.Cell("D" + i).Value = "Год выпуска";
+                    worksheet.Cell("E" + i).Value = "Имя классного руководителя";
+                    worksheet.Cell("F" + i).Value = "Контакты классного руководителя";
+
+                    rngBorder = worksheet.Range("A4:F4");
+                    rngBorder.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+
+                    worksheet.Columns().AdjustToContents();
+
+
+                    i = 1;
+                }
+
+                using (MemoryStream stream = new())
+                {
+                    workbook.SaveAs(stream);
+                    stream.Flush();
+
+                    return new FileContentResult(stream.ToArray(),
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+                    {
+                        FileDownloadName = $"groups_{DateTime.UtcNow.ToShortDateString()}.xlsx"
+                    };
+                }
+            }
         }
 
         private bool GroupExists(short id)
