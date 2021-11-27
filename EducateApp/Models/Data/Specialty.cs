@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EducateApp.Models.Data
@@ -25,6 +26,8 @@ namespace EducateApp.Models.Data
         [Display(Name = "Форма обучения")]
         [ForeignKey("IdFormOfStudy")]
         public FormOfStudy FormOfStudy { get; set; }
-    
+
+        public ICollection<Group> Groups { get; set; }
+
     }
 }
