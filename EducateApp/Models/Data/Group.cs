@@ -40,7 +40,6 @@ namespace EducateApp.Models.Data
         [Display(Name = "Контакты кл. рук.")]
         public string ContactsTeacher { get; set; }
 
-
         [Display(Name = "Специальность")]
         [ForeignKey("IdSpecialty")]
         public Specialty Specialty { get; set; }

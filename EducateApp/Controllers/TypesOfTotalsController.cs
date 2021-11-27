@@ -56,7 +56,7 @@ namespace EducateApp.Controllers
                 return NotFound();
             }
 
-            return View(typeOfTotal);
+            return PartialView(typeOfTotal);
         }
 
         // GET: TypesOfTotals/Create

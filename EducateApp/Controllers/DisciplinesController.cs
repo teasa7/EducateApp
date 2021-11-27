@@ -1,10 +1,13 @@
-﻿using EducateApp.Models;
+﻿using ClosedXML.Excel;
+using EducateApp.Models;
 using EducateApp.Models.Data;
 using EducateApp.ViewModels.Disciplines;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -53,6 +56,80 @@ namespace EducateApp.Controllers
             }
 
             return View(disciplines);
+        }
+
+        public async Task<FileResult> DownloadPattern(short? id)
+        {
+            IdentityUser user = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
+
+            var appCtx = _context.Specialties
+                .Include(s => s.FormOfStudy)
+                .Include(f => f.Groups)
+                .Where(w => w.FormOfStudy.IdUser == user.Id)
+                .OrderBy(f => f.FormOfStudy.FormOfEdu)
+                .ThenBy(f => f.Code);
+
+            int i = 1;      
+
+            IXLRange rngBorder;    
+
+            using (XLWorkbook workbook = new(XLEventTracking.Disabled))
+            {
+                foreach (Specialty specialty in appCtx)
+                {
+                    IXLWorksheet worksheet = workbook.Worksheets
+                       .Add($"{specialty.FormOfStudy.FormOfEdu.Substring(0, 3)} {specialty.Code}");
+
+
+                    worksheet.Cell("A" + i).Value = "Форма обучения";
+                    worksheet.Cell("B" + i).Value = specialty.FormOfStudy.FormOfEdu;
+
+                    i++;
+
+                    worksheet.Cell("A" + i).Value = "Код специальности";
+                    worksheet.Cell("B" + i).Value = $"'{specialty.Code}";
+
+                    i++;
+
+                    worksheet.Cell("C" + i).Value = "Название";
+                    worksheet.Cell("D" + i).Value = specialty.Name;
+
+                    i += 3;
+
+                    IXLWorksheet worksheet = workbook.Worksheets
+                       .Add($"{specialty.Groups.FormOfEdu.Substring(0, 3)} {specialty.Code}");
+
+                    worksheet.Cell("A" + i).Value = "Индекс проф модуля";
+                    worksheet.Cell("A" + 7).Value = specialty.Dis.Name;
+                    worksheet.Cell("B" + i).Value = "Название";
+                    worksheet.Cell("B" + 7).Value = discipline.ProfModule;
+                    worksheet.Cell("C" + i).Value = "Индекс";
+                    worksheet.Cell("C" + 7).Value = discipline.Index;
+                    worksheet.Cell("D" + i).Value = "Имя";
+                    worksheet.Cell("D" + 7).Value = discipline.Name;
+                    worksheet.Cell("E" + i).Value = "Краткое имя";
+                    worksheet.Cell("E" + 7).Value = discipline.ShortName;
+
+                    rngBorder = worksheet.Range("A6:E6");      
+                    rngBorder.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;       
+
+                    worksheet.Columns().AdjustToContents();
+
+                    i = 1;
+                }
+
+                using (MemoryStream stream = new())
+                {
+                    workbook.SaveAs(stream);
+                    stream.Flush();
+
+                    return new FileContentResult(stream.ToArray(),
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+                    {
+                        FileDownloadName = $"disciplines_{DateTime.UtcNow.ToShortDateString()}.xlsx"    
+                    };
+                }
+            }
         }
 
         // GET: Disciplines/Create

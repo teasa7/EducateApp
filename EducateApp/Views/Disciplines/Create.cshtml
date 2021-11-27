@@ -12,14 +12,28 @@
     </ol>
 </nav>
 
-<h3>
-    <a class="btn text-dark" asp-action="Index" title="Вернуться к списку">
-        <i class="fas fa-arrow-left"></i>
-    </a>
-    Добавление дисциплины
-</h3>
-<hr />
-<hr />
+<h2>Дисциплины</h2>
+
+<div id="modDialog" class="modal fade">
+    <div id="dialogContent" class="modal-dialog"></div>
+</div>
+
+<div class="d-flex justify-content-between">
+    <div class="p-2">
+        <ul class="nav">
+            <li>
+                <a class="btn text-dark" asp-action="DownloadPattern" title="Скачать шаблон">
+                    <i class="fas fa-file-download"></i>
+                </a>
+            </li>
+            <li>
+                <a class="btn text-dark" asp-action="Create">
+                    <i class="far fa-plus-square"></i>  Добавить дисциплину
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>
 <div class="row">
     <div class="col-md-4">
         <form asp-action="Create">

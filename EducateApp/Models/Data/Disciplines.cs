@@ -30,8 +30,9 @@ namespace EducateApp.Models.Data
         [Required]
         public string IdUser { get; set; }
 
-
         [ForeignKey("IdUser")]
         public User User { get; set; }
+
+
     }
 }

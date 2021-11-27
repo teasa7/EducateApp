@@ -28,6 +28,7 @@ namespace EducateApp.Models.Data
         public FormOfStudy FormOfStudy { get; set; }
 
         public ICollection<Group> Groups { get; set; }
+        public ICollection<Disciplines> Disciplines { get; set; }
 
     }
 }

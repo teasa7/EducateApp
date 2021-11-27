@@ -310,52 +310,62 @@ namespace EducateApp.Controllers
             return PartialView(group);
         }
 
-        public async Task<FileResult> DownloadPattern()
+        public async Task<FileResult> DownloadPattern(short? id)
         {
             IdentityUser user = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
 
             var appCtx = _context.Specialties
-                .Include(s => s.FormOfStudy)
-                .Include(f => f.Groups)
+                .Include(s => s.FormOfStudy)   
+                .Include(f => f.Groups)     
                 .Where(w => w.FormOfStudy.IdUser == user.Id)
-                .OrderBy(f => f.FormOfStudy.FormOfEdu)
+                .OrderBy(f => f.FormOfStudy.FormOfEdu)   
                 .ThenBy(f => f.Code);
 
-            int i = 1;
-            IXLRange rngBorder;
+            int i = 1;    
+
+            IXLRange rngBorder;  
+
 
             using (XLWorkbook workbook = new(XLEventTracking.Disabled))
             {
+
                 foreach (Specialty specialty in appCtx)
                 {
                     IXLWorksheet worksheet = workbook.Worksheets
                         .Add($"{specialty.FormOfStudy.FormOfEdu.Substring(0, 3)} {specialty.Code}");
 
-
                     worksheet.Cell("A" + i).Value = "Форма обучения";
                     worksheet.Cell("B" + i).Value = specialty.FormOfStudy.FormOfEdu;
+
                     i++;
 
                     worksheet.Cell("A" + i).Value = "Код специальности";
                     worksheet.Cell("B" + i).Value = $"'{specialty.Code}";
+                    
+                    i++;
 
                     worksheet.Cell("C" + i).Value = "Название";
                     worksheet.Cell("D" + i).Value = specialty.Name;
 
-
                     i += 2;
-                    worksheet.Cell("A" + i).Value = "Название группы";
-                    worksheet.Cell("B" + i).Value = "Кол. студентов";
-                    worksheet.Cell("C" + i).Value = "Год поступления";
-                    worksheet.Cell("D" + i).Value = "Год выпуска";
-                    worksheet.Cell("E" + i).Value = "Имя классного руководителя";
-                    worksheet.Cell("F" + i).Value = "Контакты классного руководителя";
 
-                    rngBorder = worksheet.Range("A4:F4");
-                    rngBorder.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+                    worksheet.Cell("A" + i).Value = "Название группы";
+                    worksheet.Cell("A" + 7).Value = specialty.Group.Name;
+                    worksheet.Cell("B" + i).Value = "Кол. студентов";
+                    worksheet.Cell("A" + 7).Value = group.CountOfStudents;
+                    worksheet.Cell("C" + i).Value = "Год поступления";
+                    worksheet.Cell("A" + 7).Value = group.YearOfAdmission;
+                    worksheet.Cell("D" + i).Value = "Год выпуска";
+                    worksheet.Cell("A" + 7).Value = group.YearOfIssue;
+                    worksheet.Cell("E" + i).Value = "Имя классного руководителя";
+                    worksheet.Cell("A" + 7).Value = group.ClassTeacher;
+                    worksheet.Cell("F" + i).Value = "Контакты классного руководителя";
+                    worksheet.Cell("A" + 7).Value = group.ContactsTeacher;
+
+                    rngBorder = worksheet.Range("A4:F4");      
+                    rngBorder.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;       
 
                     worksheet.Columns().AdjustToContents();
-
 
                     i = 1;
                 }
@@ -368,7 +378,7 @@ namespace EducateApp.Controllers
                     return new FileContentResult(stream.ToArray(),
                         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
                     {
-                        FileDownloadName = $"groups_{DateTime.UtcNow.ToShortDateString()}.xlsx"
+                        FileDownloadName = $"groups_{DateTime.UtcNow.ToShortDateString()}.xlsx"    
                     };
                 }
             }
