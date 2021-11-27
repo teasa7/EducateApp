@@ -28,16 +28,23 @@ namespace EducateApp.Controllers
         }
 
         // GET: FormsOfStudy
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(FormOfStudySortState sortOrder = FormOfStudySortState.FormOfEduAsc)
         {
             IdentityUser user = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
 
-            var appCtx = _context.FormsOfStudy
-                .Include(f => f.User)               
-                .Where(f => f.IdUser == user.Id)    
-                .OrderBy(f => f.FormOfEdu);         
+            var formsOfStudy = _context.FormsOfStudy
+                .Include(f => f.User)
+                .Where(f => f.IdUser == user.Id);     
 
-            return View(await appCtx.ToListAsync());
+            ViewData["FormOfEduSort"] = sortOrder == FormOfStudySortState.FormOfEduAsc ? FormOfStudySortState.FormOfEduDesc : FormOfStudySortState.FormOfEduAsc;
+
+            formsOfStudy = sortOrder switch
+            {
+                FormOfStudySortState.FormOfEduDesc => formsOfStudy.OrderByDescending(s => s.FormOfEdu),
+                _ => formsOfStudy.OrderBy(s => s.FormOfEdu),
+            };
+
+            return View(await formsOfStudy.AsNoTracking().ToListAsync());
         }
 
         // GET: FormsOfStudy/Create
