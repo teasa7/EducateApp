@@ -55,10 +55,10 @@ namespace EducateApp.Controllers
                 return NotFound();
             }
 
-            return View(disciplines);
+            return PartialView(disciplines);
         }
 
-        public async Task<FileResult> DownloadPattern(short? id)
+        public async Task<FileResult> DownloadPattern()
         {
             IdentityUser user = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
 
@@ -69,9 +69,9 @@ namespace EducateApp.Controllers
                 .OrderBy(f => f.FormOfStudy.FormOfEdu)
                 .ThenBy(f => f.Code);
 
-            int i = 1;      
+            int i = 1;
 
-            IXLRange rngBorder;    
+            IXLRange rngBorder;
 
             using (XLWorkbook workbook = new(XLEventTracking.Disabled))
             {
@@ -91,27 +91,19 @@ namespace EducateApp.Controllers
 
                     i++;
 
-                    worksheet.Cell("C" + i).Value = "Название";
-                    worksheet.Cell("D" + i).Value = specialty.Name;
+                    worksheet.Cell("A" + i).Value = "Название";
+                    worksheet.Cell("B" + i).Value = specialty.Name;
 
                     i += 3;
 
-                    IXLWorksheet worksheet = workbook.Worksheets
-                       .Add($"{specialty.Groups.FormOfEdu.Substring(0, 3)} {specialty.Code}");
-
                     worksheet.Cell("A" + i).Value = "Индекс проф модуля";
-                    worksheet.Cell("A" + 7).Value = specialty.Dis.Name;
                     worksheet.Cell("B" + i).Value = "Название";
-                    worksheet.Cell("B" + 7).Value = discipline.ProfModule;
                     worksheet.Cell("C" + i).Value = "Индекс";
-                    worksheet.Cell("C" + 7).Value = discipline.Index;
                     worksheet.Cell("D" + i).Value = "Имя";
-                    worksheet.Cell("D" + 7).Value = discipline.Name;
                     worksheet.Cell("E" + i).Value = "Краткое имя";
-                    worksheet.Cell("E" + 7).Value = discipline.ShortName;
 
-                    rngBorder = worksheet.Range("A6:E6");      
-                    rngBorder.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;       
+                    rngBorder = worksheet.Range("A6:E6");
+                    rngBorder.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
 
                     worksheet.Columns().AdjustToContents();
 
@@ -126,7 +118,7 @@ namespace EducateApp.Controllers
                     return new FileContentResult(stream.ToArray(),
                         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
                     {
-                        FileDownloadName = $"disciplines_{DateTime.UtcNow.ToShortDateString()}.xlsx"    
+                        FileDownloadName = $"disciplines_{DateTime.UtcNow.ToShortDateString()}.xlsx"
                     };
                 }
             }

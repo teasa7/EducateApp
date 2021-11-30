@@ -289,8 +289,6 @@ namespace EducateApp.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-
-
         // GET: Groups/Details/5
         public async Task<IActionResult> Details(short? id)
         {
@@ -310,7 +308,7 @@ namespace EducateApp.Controllers
             return PartialView(group);
         }
 
-        public async Task<FileResult> DownloadPattern(short? id)
+        public async Task<FileResult> DownloadPattern()
         {
             IdentityUser user = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
 
@@ -344,25 +342,19 @@ namespace EducateApp.Controllers
                     
                     i++;
 
-                    worksheet.Cell("C" + i).Value = "Название";
-                    worksheet.Cell("D" + i).Value = specialty.Name;
+                    worksheet.Cell("A" + i).Value = "Название";
+                    worksheet.Cell("B" + i).Value = specialty.Name;
 
-                    i += 2;
+                    i += 3;
 
                     worksheet.Cell("A" + i).Value = "Название группы";
-                    worksheet.Cell("A" + 7).Value = specialty.Group.Name;
                     worksheet.Cell("B" + i).Value = "Кол. студентов";
-                    worksheet.Cell("A" + 7).Value = group.CountOfStudents;
                     worksheet.Cell("C" + i).Value = "Год поступления";
-                    worksheet.Cell("A" + 7).Value = group.YearOfAdmission;
                     worksheet.Cell("D" + i).Value = "Год выпуска";
-                    worksheet.Cell("A" + 7).Value = group.YearOfIssue;
                     worksheet.Cell("E" + i).Value = "Имя классного руководителя";
-                    worksheet.Cell("A" + 7).Value = group.ClassTeacher;
                     worksheet.Cell("F" + i).Value = "Контакты классного руководителя";
-                    worksheet.Cell("A" + 7).Value = group.ContactsTeacher;
 
-                    rngBorder = worksheet.Range("A4:F4");      
+                    rngBorder = worksheet.Range("A6:F6");      
                     rngBorder.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;       
 
                     worksheet.Columns().AdjustToContents();
