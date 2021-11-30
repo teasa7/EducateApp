@@ -27,7 +27,9 @@
         <thead class="thead-light">
             <tr>
                 <th>
-                    @Html.DisplayNameFor(model => model.CertificateName)
+                    <a asp-action="Index" asp-route-sortOrder="@ViewBag.CertificateNameSort">
+                        @Html.DisplayNameFor(model => model.CertificateName)
+                    </a>
                 </th>
                 <th>
                     @Html.DisplayNameFor(model => model.User.LastName)

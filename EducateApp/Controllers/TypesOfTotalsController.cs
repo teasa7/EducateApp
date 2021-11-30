@@ -28,16 +28,23 @@ namespace EducateApp.Controllers
         }
 
         // GET: TypesOfTotals
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(TypeOfTotalSortState sortOrder = TypeOfTotalSortState.CertificateNameAsc)
         {
             IdentityUser user = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
 
-            var appCtx = _context.TypesOfTotals
+            var typesOfTotals = _context.TypesOfTotals
                 .Include(i => i.User)
-                .Where(w => w.IdUser == user.Id)
-                .OrderBy(o => o.CertificateName);
+                .Where(w => w.IdUser == user.Id);     
 
-            return View(await appCtx.ToListAsync());
+            ViewData["CertificateNameSort"] = sortOrder == TypeOfTotalSortState.CertificateNameAsc ? TypeOfTotalSortState.CertificateNameDesc : TypeOfTotalSortState.CertificateNameAsc;
+
+            typesOfTotals = sortOrder switch
+            {
+                TypeOfTotalSortState.CertificateNameDesc => typesOfTotals.OrderByDescending(s => s.CertificateName),
+                _ => typesOfTotals.OrderBy(s => s.CertificateName),
+            };
+
+            return View(await typesOfTotals.AsNoTracking().ToListAsync());
         }
 
         // GET: TypesOfTotals/Details/5
