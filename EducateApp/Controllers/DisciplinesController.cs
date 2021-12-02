@@ -28,15 +28,87 @@ namespace EducateApp.Controllers
         }
 
         // GET: Disciplines
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string IndexProfModule, string ProfModule, string Index, string name, string ShortName,
+            int page = 1,
+           DisciplineSortState sortOrder = DisciplineSortState.IndexProfModuleAsc)
         {
             IdentityUser user = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
 
-            var appCtx = _context.Disciplines
+            int pageSize = 15;
+            IQueryable<Disciplines> disciplines = _context.Disciplines
                 .Include(d => d.User)
-                .Where(w => w.IdUser == user.Id)
-                .OrderBy(o => o.Name);
-            return View(await appCtx.ToListAsync());
+                .Where(w => w.IdUser == user.Id);
+
+            if (!String.IsNullOrEmpty(IndexProfModule))
+            {
+                disciplines = disciplines.Where(p => p.IndexProfModule.Contains(IndexProfModule));
+            }
+            if (!String.IsNullOrEmpty(ProfModule))
+            {
+                disciplines = disciplines.Where(p => p.ProfModule.Contains(ProfModule));
+            }
+            if (!String.IsNullOrEmpty(Index))
+            {
+                disciplines = disciplines.Where(p => p.Index.Contains(Index));
+            }
+            if (!String.IsNullOrEmpty(name))
+            {
+                disciplines = disciplines.Where(p => p.Name.Contains(name));
+            }
+            if (!String.IsNullOrEmpty(ShortName))
+            {
+                disciplines = disciplines.Where(p => p.ShortName.Contains(ShortName));
+            }
+
+            switch (sortOrder)
+            {
+                case DisciplineSortState.IndexProfModuleDesc:
+                    disciplines = disciplines.OrderByDescending(s => s.IndexProfModule);
+                    break;
+                case DisciplineSortState.ProfModuleAsc:
+                    disciplines = disciplines.OrderBy(s => s.ProfModule);
+                    break;
+                case DisciplineSortState.ProfModuleDesc:
+                    disciplines = disciplines.OrderByDescending(s => s.ProfModule);
+                    break;
+                case DisciplineSortState.IndexAsc:
+                    disciplines = disciplines.OrderBy(s => s.Index);
+                    break;
+                case DisciplineSortState.IndexDesc:
+                    disciplines = disciplines.OrderByDescending(s => s.Index);
+                    break;
+                case DisciplineSortState.NameAsc:
+                    disciplines = disciplines.OrderBy(s => s.Name);
+                    break;
+                case DisciplineSortState.NameDesc:
+                    disciplines = disciplines.OrderByDescending(s => s.Name);
+                    break;
+                case DisciplineSortState.ShortNameAsc:
+                    disciplines = disciplines.OrderBy(s => s.ShortName);
+                    break;
+                case DisciplineSortState.ShortNameDesc:
+                    disciplines = disciplines.OrderByDescending(s => s.ShortName);
+                    break;
+                case DisciplineSortState.IndexProfModuleAsc:
+                    break;
+                default:
+                    disciplines = disciplines.OrderBy(s => s.IndexProfModule);
+                    break;
+            }
+
+            var count = await disciplines.CountAsync();
+            var items = await disciplines.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+
+            IndexDisciplineViewModel viewModel = new()
+            {
+                PageViewModel = new(count, page, pageSize),
+                SortDisciplineViewModel = new(sortOrder),
+                FilterDisciplineViewModel = new(IndexProfModule, ProfModule, Index, name, ShortName),
+                Disciplines = items
+            };
+
+            return View(viewModel);
+
         }
 
         // GET: Disciplines/Details/5
