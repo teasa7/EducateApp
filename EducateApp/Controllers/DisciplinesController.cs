@@ -34,7 +34,8 @@ namespace EducateApp.Controllers
         {
             IdentityUser user = await _userManager.FindByNameAsync(HttpContext.User.Identity.Name);
 
-            int pageSize = 15;
+            int pageSize = 5;
+
             IQueryable<Disciplines> disciplines = _context.Disciplines
                 .Include(d => d.User)
                 .Where(w => w.IdUser == user.Id);
